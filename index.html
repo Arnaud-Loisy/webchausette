@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<title>HTML5 : Web Sockets</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="styles.css" type="text/css">
+	</head>
+	<body>
+		<div class="wrap">
+			<form>
+				<p id="readyState">
+					readyState : <span
+					id="rs">&nbsp;</span>
+				</p>
+				<p>
+					<strong>Journal</strong>
+				</p>
+				<div name="log" id="log"></div>
+				<p>
+					<label for="texte">Envoyer</label>
+					<input type="text" name="texte" id="texte">
+					<input type="submit" value="OK" id="valid">
+				</p>
+				<p>
+					<strong>Commandes</strong>
+				</p>
+				<ul>
+					<li>
+						<kbd>hello</kbd> : saluer
+					</li>
+					<li>
+						<kbd>date</kbd> : demander la date
+					</li>
+					<li>
+						<kbd>bye</kbd> ou <kbd>ciao</kbd> : quitter
+					</li>
+				</ul>
+			</form>
+		</div>
