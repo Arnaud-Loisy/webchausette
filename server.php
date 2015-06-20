@@ -26,10 +26,9 @@ class ChatBot extends WebSocket {
             case "disconnect":
                 break;
             case "connect":
-
-                $query = "SELECT mdp FROM Utilisateur WHERE $login";
-                $result = mysqli_query($link, $query);
-                $this->say(mysqli_fetch_array($result));
+                //$query = "SELECT mdp FROM Utilisateur WHERE $login";
+                //$result = mysqli_query($link, $query);
+                //$this->say(mysqli_fetch_array($result));
                 // Si le nom d'utilisateur existe
                 /*if ($arr = mysqli_fetch_array($result)) {
                     // Si le mot de passe est OK
@@ -59,7 +58,7 @@ class ChatBot extends WebSocket {
             case "CLOSE":
                 break;
             // envoi d'un message public
-            case "MESSAGE": // broadcast pour l'instant
+            case "message": // broadcast pour l'instant
                 /* // SI MESSAGE PRIVE
                   if ($true) {
 
