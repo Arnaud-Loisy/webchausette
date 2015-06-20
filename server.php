@@ -14,7 +14,7 @@ class ChatBot extends WebSocket {
         $this->say("< " . $msg);
 
         // Parsage du message pour récup le bon champs
-        // 
+        //
         // identifier le premier champs, qui détermine la fonction a assurer
         switch ($msg) {
             case "DISCONNECT":
