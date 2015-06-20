@@ -12,6 +12,17 @@ var ws = null;
 				// Lors de l'ouverture de connexion
 				ws.onopen = function() {
 					log("Socket ouvert");
+					var login = document.getElementById('login');
+					var msg_connection = {
+						type:"connect",
+						login:"toto",
+						pwd:"toto",
+						
+					};
+					
+					// Envoi du message JSON
+					ws.send(JSON.stringify(msg_connection));
+					
 					rs.innerHTML = this.readyState;
 				};
 				// Lors de la réception d'un message
