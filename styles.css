@@ -55,3 +55,11 @@ ul {
 	color: #fff;
 	padding: 0.1em 0.5em;
 }
+.checkB input[type="checkbox"] {
+	display:none; 
+}
+.checkB input[type="checkbox"]:checked + label { 
+	background-color: #009E0F;
+	color: white;
+
+}
