@@ -31,11 +31,11 @@ if ( typeof ws !== 'undefined') {
 		var msg = JSON.parse(e.data);
 
 		switch(msg.type) {
-		case connect:
+		case "connect":
 			// Affichage de l'user qui se connecte
 			document.getElementById('users').innerHTML += '<span class="checkB"><input type="checkbox" id="' + msg.login + '"  name="' + msg.login + '" value=' + msg.login + ' />	<label for="' + msg.login + '">' + msg.login + '</label></span><br>\n';
 			break;
-		case message:
+		case "message":
 			// Ajout au journal du contenu du message
 			log(msg.from + "< " + msg.message);
 			break;
