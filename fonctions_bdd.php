@@ -22,15 +22,18 @@ function requeteHistoriqueSalon($numSalon)
     return $requete;
 }
 
-function requeteUtilisateur(){
-    
-}
-function requeteUtilisateursDuSalon($numSalon){
-    $requete = "SELECT * FROM Utilisateur WHERE idSalon = $numSalon";
+function requeteAjoutSocketUtilisateur($nomUtilisateur,$idSocket){
+    $requete = "UPDATE Utilisateur SET idSocket=$idSocket WHERE idUtilisateur = $nomUtilisateur;";
     return $requete;
 }
+
 function requeteAjouterUtilisateurAuSalon($nomUser,$numSalon){
     $requete = "UPDATE Utilisateur SET idSalon='$numSalon' WHERE nom = $nomUser;";
+    return $requete;
+}
+
+function requeteMdpUtilisateur($nomUtilisateur){
+    $requete = "SELECT mdp FROM Utilisateur WHERE $nomUtilisateur";
     return $requete;
 }
 ?>
