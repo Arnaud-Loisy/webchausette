@@ -1,6 +1,6 @@
 #!/usr/bin/php -q
 <?php
-include "fonctions_bdd.php";
+
 
 // Execution en ligne de commande : php -q <nomdufichier>.php
 // Inclusion de la librairie phpwebsocket
@@ -8,29 +8,34 @@ require "websocket.class.php";
 
 // Extension de WebSocket
 class ChatBot extends WebSocket {
+    
 
     function process($user, $msg) {
-        $link = connectBDD();
+        $link = mysqli_connect('192.168.0.2', 'projet', 'projet', 'webchaussette');
         $this->say("< " . $msg);
-
+        
         // Parsage du message pour récup le bon champs
-        //
+        $parsedMsg=json_decode($msg,true);
+        $type=$parsedMsg["type"];
+        $login=$parsedMsg["login"];
+        $pwd=$parsedMsg["pwd"];
+        $this->say("< Type de message " .$type );
+        
         // identifier le premier champs, qui détermine la fonction a assurer
-        switch ($msg) {
-            case "DISCONNECT":
+        switch ($type) {
+            case "disconnect":
                 break;
-            case "CONNECT":
+            case "connect":
 
-                $query = requeteMdpUtilisateur($nomUtilisateur);
+                $query = "SELECT mdp FROM Utilisateur WHERE $login";
                 $result = mysqli_query($link, $query);
-
+                $this->say(mysqli_fetch_array($result));
                 // Si le nom d'utilisateur existe
-                if ($arr = mysqli_fetch_array($result) != NULL) {
-
+                /*if ($arr = mysqli_fetch_array($result)) {
                     // Si le mot de passe est OK
-                    if ($arr["mdp"] == $mdpTransmis) {
+                    if ($arr["mdp"] == $pwd) {
                         // Ajouter l'identifiant de socket de l'utilisateur dans la BDD
-                        $query = requeteAjoutSocketUtilisateur($nomUtilisateur, $idSocket);
+                        $query = "UPDATE Utilisateur SET idSocket="+$user->socket+"WHERE idUtilisateur = $login;";
                         $result = mysqli_query($link, $query);
                         if (mysqli_fetch_array($result) != NULL) {
                             // Renvoyer le bon message au client
@@ -40,8 +45,11 @@ class ChatBot extends WebSocket {
                                 $this->send($utilisateur->socket, "$nomUtilisateur s'est connecté");
                             }
                         }
-                    }
-                }
+                   }
+                }  */
+                $this->send($user->socket, $msg);
+                $this->send($user->socket, "Bravo $login tu t'es bien connecté !");
+                
 
 
 

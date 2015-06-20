@@ -12,7 +12,7 @@ function connexionBDD()
         $password="beefIsMagic5";
         $db="webchaussette";
 	
-	$result = mysqli_connect("host=$host user=$login password=$password dbname=$db");
+	$result = mysqli_connect("host='192.168.0.2' user='$login'root' password='beefIsMagic5' dbname='webchaussette'");
 	return $result;
 }
 
