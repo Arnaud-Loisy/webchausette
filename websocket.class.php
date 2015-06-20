@@ -131,6 +131,7 @@ class WebSocket{
     array_push($this->sockets,$socket);
     $this->log($socket." CONNECTED!");
     $this->log(date("d/n/Y ")."at ".date("H:i:s T"));
+    
   }
 
   function disconnect($socket){
