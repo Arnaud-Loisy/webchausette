@@ -11,51 +11,55 @@ class ChatBot extends WebSocket {
     
 
     function process($user, $msg) {
-        $link = mysqli_connect('192.168.0.2', 'projet', 'projet', 'webchaussette');
-        $this->say("< " . $msg);
         
-        // Parsage du message pour récup le bon champs
+        // Debug
+        $this->say("> Message reçu : " . $msg);
+        
+        // Récupération des différents champs du message
         $parsedMsg=json_decode($msg,true);
         $type=$parsedMsg["type"];
         $login=$parsedMsg["login"];
         $pwd=$parsedMsg["pwd"];
-        $this->say("< Type de message " .$type );
         
-        // identifier le premier champs, qui détermine la fonction a assurer
+        // Connexion à la bdd
+        //$link = mysqli_connect('192.168.0.2', 'projet', 'projet', 'webchaussette');
+        $link = mysqli_connect('www.remi-boyer.fr', 'projet', 'projet', 'webchaussette');
+        
+        // Traitement fonction du type du message
+        $this->say("> Type du message reçu : " .$type );
+        $this->say("> Id socket : $user->socket");
         switch ($type) {
-            case "disconnect":
-                break;
             case "connect":
-                //$query = "SELECT mdp FROM Utilisateur WHERE $login";
-                //$result = mysqli_query($link, $query);
-                //$this->say(mysqli_fetch_array($result));
+                // Construction de la requête
+                $query = "SELECT mdp FROM Utilisateur WHERE nom='$login';";
+                $result = mysqli_query($link, $query);
+                
                 // Si le nom d'utilisateur existe
-                /*if ($arr = mysqli_fetch_array($result)) {
+                if ($arr = mysqli_fetch_array($result)) {
                     // Si le mot de passe est OK
                     if ($arr["mdp"] == $pwd) {
-                        // Ajouter l'identifiant de socket de l'utilisateur dans la BDD
-                        $query = "UPDATE Utilisateur SET idSocket="+$user->socket+"WHERE idUtilisateur = $login;";
+                        // Ajout de l'identifiant de socket de l'utilisateur dans la BDD
+                        $query = "UPDATE Utilisateur SET idSocket='"+$user->socket+"' WHERE nom='$login';";
                         $result = mysqli_query($link, $query);
-                        if (mysqli_fetch_array($result) != NULL) {
-                            // Renvoyer le bon message au client
-                            $this->send($utilisateur->socket, "Connexion OK !");
-                            // Notifier tout le monde qu'il s'est connecté
-                            foreach ($this->users as $utilisateur) {
-                                $this->send($utilisateur->socket, "$nomUtilisateur s'est connecté");
-                            }
+                        $this->say("> Idsocket ajouté pour $login");
+                        
+                        // Notification de nouvelle connexion à tous les clients connectés
+                        $this->say("RENVOI DU MESSAGE A TOUS LES CLIENTS");
+                        foreach ($this->users as $utilisateur) {
+                            $this->send($utilisateur->socket, $msg);
+                            $this->send($utilisateur->socket, "$login s'est connecté !");
                         }
+                   } else { // MDP erroné
+                       
                    }
-                }  */
-                $this->send($user->socket, $msg);
-                $this->send($user->socket, "Bravo $login tu t'es bien connecté !");
-                
-
-
-
-
-
+                } else { // Login inconnu
+                    
+                }
+                //$this->send($user->socket, $msg);
+                //$this->send($user->socket, "Bravo $login, tu t'es bien connecté !");
                 break;
-            case "CLOSE":
+            case "disconnect":
+                $this->send($user->socket, "Disconnect bien reçu ");
                 break;
             // envoi d'un message public
             case "message": // broadcast pour l'instant
@@ -79,12 +83,14 @@ class ChatBot extends WebSocket {
                     $this->send($utilisateur->socket, $msg);
                 }
                 break;
-            case "OPEN":
+            case "open":
+                $this->send($user->socket, "Open bien reçu ");
                 break;
-            case "CLOSE":
+            case "close":
+                $this->send($user->socket, "Close bien reçu !");
                 break;
             default:
-                $this->send($user->socket, "Pas compris !");
+                $this->send($user->socket, "Pas compris mec !");
                 break;
         }
     }
