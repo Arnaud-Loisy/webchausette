@@ -23,6 +23,7 @@ if ( typeof ws !== 'undefined') {
 
 		// Envoi du message JSON
 		ws.send(JSON.stringify(msg_connection));
+		console.log(JSON.stringify(msg_connection));
 
 		rs.innerHTML = this.readyState;
 	};
@@ -30,11 +31,12 @@ if ( typeof ws !== 'undefined') {
 	ws.onmessage = function(e) {
 
 		var msg = JSON.parse(e.data);
-
 		switch(msg.type) {
 		case "connect":
+			//alert("avant ajout user");
 			// Affichage de l'user qui se connecte
-			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="' + msg.login + '"  name="users" value=' + msg.login + ' />	<label for="' + msg.login + '">' + msg.login + '</label></span><br>\n';
+			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="'+user_nb+'"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span><br>\n';
+			user_nb++;
 			break;
 		case "message":
 			// Ajout au journal du contenu du message
@@ -65,23 +67,66 @@ if ( typeof ws !== 'undefined') {
 	// Evénement submit du formulaire
 	document.getElementsByTagName('form')[0].onsubmit = function(e) {
 		var dest = "";
+		var salon = "";
 		var texte = document.getElementById('texte');
-		if (document.getElementById('toto').checked) {
-  dest = document.getElementById('toto').value;
-}
-alert(dest);
-		
+
+		if (document.getElementById('global').checked) {
+			salon = document.getElementById('global').value;
+		} else {
+			if (document.getElementById('0').checked) {
+				dest = document.getElementById('0').value;
+			} else {
+				if (document.getElementById('1').checked) {
+					dest = document.getElementById('1').value;
+				} else {
+					if (document.getElementById('2').checked) {
+						dest = document.getElementById('2').value;
+					} else {
+						if (document.getElementById('3').checked) {
+							dest = document.getElementById('3').value;
+						} else {
+							if (document.getElementById('4').checked) {
+								dest = document.getElementById('4').value;
+							} else {
+								if (document.getElementById('5').checked) {
+									dest = document.getElementById('5').value;
+								} else {
+									if (document.getElementById('6').checked) {
+										dest = document.getElementById('6').value;
+									} else {
+										if (document.getElementById('7').checked) {
+											dest = document.getElementById('7').value;
+										} else {
+											if (document.getElementById('8').checked) {
+												dest = document.getElementById('8').value;
+											} else {
+
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		console.log("dest=" + dest);
+		console.log("salon=" + salon);
+
 		var login = document.getElementById('login');
 		var msg = {
 			type : "message",
 			from : "login",
-			salon : "",
+			salon : salon,
 			dest : dest,
 			message : texte.value
 		};
 
 		// Envoi du message JSON
 		ws.send(JSON.stringify(msg));
+		console.log(JSON.stringify(msg));
 		log(msg.from + "> " + texte.value);
 		// Mise à zéro du champ et focus
 		texte.focus();
