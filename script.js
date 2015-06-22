@@ -35,7 +35,7 @@ if ( typeof ws !== 'undefined') {
 		case "connect":
 			//alert("avant ajout user");
 			// Affichage de l'user qui se connecte
-			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="'+user_nb+'"  name="users" value="' + msg.login + '" />	<label for="' + msg.login + '">' + msg.login + '</label></span><br>\n';
+			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="'+user_nb+'"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span><br>\n';
 			user_nb++;
 			break;
 		case "message":
