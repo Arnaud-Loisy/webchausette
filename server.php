@@ -9,6 +9,7 @@ require "websocket.class.php";
 // Extension de WebSocket
 class ChatBot extends WebSocket {
     
+    var $assoUsersSockets = array();
 
     function process($user, $msg) {
         
@@ -39,49 +40,66 @@ class ChatBot extends WebSocket {
                     // Si le mot de passe est OK
                     if ($arr["mdp"] == $pwd) {
                         
-                        /*// Si un socket est déjà ouvert pour cet utilisateur, fermeture de ce dernier
+                        // Si un socket est déjà ouvert pour cet utilisateur, fermeture de ce dernier
                         $this->say("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA Verification si $login est deja connecté");
-                        $query = "SELECT idSocket FROM Utilisateur WHERE nom='$login';";
+                        
+                        $socketToDisconnect=$this->assoUsersSockets[$login];
+                        if($socketToDisconnect!=null){
+                            $this->say("$login deja connecte sur le socket $socketToDisconnect");
+                            $this->disconnect($socketToDisconnect);
+                            $this->say("$login est désormais deconnecte !");
+                        }
+                        /**$query = "SELECT idSocket FROM Utilisateur WHERE nom='$login';";
                         $this->say("Requete envoyée = $query");
                         $result = mysqli_query($link, $query);
                         $arr = mysqli_fetch_array($result);
                         $ancienSocket=$arr['idSocket'];
-                        if($ancienSocket !=''){
-                            $this->say("$login était deje connecte ailleurs sur le socket $ancienSocket");
-                            $this->disconnect($ancienSocket);
-                        }*/
                         
+                        $ancienUser=$this->getuserbysocket($ancienSocket);
+                        
+                        */
+                        /*if($u){
+                            $this->say("$login était deje connecte ailleurs sur le socket $ancienSocket");
+                           // $this->disconnect(8);
+                           //$this->disconnect($assoUsersSockets[);
+                           // $this->disconnect($ancienSocket);
+                        }*/
+                        //if($assoUsersSockets[$user->socket]!=null){
+                          //  $this->disconnect($ancienUser->socket);
                          // Ajout de l'identifiant de socket de l'utilisateur dans la BDD
-                        $idSocketUser = $user->socket;
-                        $query = "UPDATE Utilisateur SET idSocket='$idSocketUser' WHERE nom='$login';";
-                        //$this->say("AAAAAAAAAAAAAAAAAAAAA : $query");
-                        $result = mysqli_query($link, $query);
+                        $this->assoUsersSockets[$login]=$user->socket;
                         $this->say("> Idsocket ajouté pour $login");
+                        //$idSocketUser = $user->socket;
+                        //$query = "UPDATE Utilisateur SET idSocket='$idSocketUser' WHERE nom='$login';";
+                        //$this->say("AAAAAAAAAAAAAAAAAAAAA : $query");
+                        //$result = mysqli_query($link, $query);
+                        
                        
                                 
                         // Envoi de la liste des utilisateurs déjà connectés
+                        
+                        
                         // Pour chaque utilisateur connecté
                         $this->say("Liste des connectés actuel");
-                    
                         foreach ($this->users as $utilisateur) {
                             
                             // récupérer son login
-                            $socketCourant = $utilisateur->socket;
-                            $query = "SELECT nom FROM Utilisateur WHERE idSocket='$socketCourant'";
-                            $this->say("Requete envoyée : $query");
-                            $result = mysqli_query($link, $query);
-                            $arr = mysqli_fetch_array($result);
+                            //$socketCourant = $utilisateur->socket;
+                            //$query = "SELECT nom FROM Utilisateur WHERE idSocket='$socketCourant'";
+                            //$this->say("Requete envoyée : $query");
+                            //$result = mysqli_query($link, $query);
+                            //$arr = mysqli_fetch_array($result);
                             
-                            $this->say($arr['nom']);
-                             
+                            //$this->say($arr['nom']);
+                            
+                            if($connectedUser=array_search($utilisateur->socket, $this->assoUsersSockets)){
+                            $this->say($connectedUser);
                             // formater le message d'envoi
-                            $connectedUser = json_encode("{'type':'connect','login':'"+$arr['nom']+"','pwd':''}");
-                            
-                           
-                            
+                            $connectedUserMsg = json_encode("{'type':'connect','login':'"+$connectedUser+"','pwd':''}");
+                   
                             // envoyer au mec nouvellement connecté
-                            $this->send($user->socket, $connectedUser);
-                            
+                            $this->send($user->socket, $connectedUserMsg);
+                            }
                         }
 
                        
