@@ -17,6 +17,8 @@ if ( typeof ws !== 'undefined') {
 		//window.pwd = '<?=$_POST['pwd']?>';
 		var login = document.getElementById('login');
 		var pwd = document.getElementById('pwd');
+		log.console("login.value :"+login.value);
+		log.console("pwd.value :"+pwd.value);
 		var msg_connection = {
 			type : "connect",
 			login : login.value,

@@ -1,17 +1,18 @@
 <!doctype html>
 <html lang="fr">
 	<head>
-		<?php
-		session_start();
-		echo '<div id="login">' . $_POST["login"] . '</div>';
-		echo '<div id="login">' . $_POST["mdp"] . '</div>';
-		?>
+		
 		<title>WebCat</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="styles.css" type="text/css">
 
 	</head>
 	<body>
+		<?php
+		session_start();
+		echo "<div id=\"login\">" . $_POST["login"] . "</div>";
+		echo "<div id=\"pwd\">" . $_POST["mdp"] . "</div>";
+		?>
 		<div class="wrap">
 			<div name="users" id="users">
 				<span class="checkB">
