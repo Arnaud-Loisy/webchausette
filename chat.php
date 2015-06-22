@@ -10,8 +10,8 @@
 	<body>
 		<?php
 		session_start();
-		echo "<div id=\"login\">" . $_POST["login"] . "</div>";
-		echo "<div id=\"pwd\">" . $_POST["mdp"] . "</div>";
+		echo '<div id="login">' . $_POST["login"] . '</div>';
+		echo '<div id="login">' . $_POST["mdp"] . '</div>';
 		?>
 		<div class="wrap">
 			<div name="users" id="users">
