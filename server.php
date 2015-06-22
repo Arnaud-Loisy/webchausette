@@ -206,6 +206,18 @@ class ChatBot extends WebSocket {
 
             case "open":
                 $this->say("DEBUT TRAITEMENT OPEN");
+                
+                // Récup des champs
+                $login=$parsedMsg["from"];
+                $salon=$parsedMsg["salon"];
+                
+                
+                // Récupération de l'id BDD correspondant au login  
+                $query = "SELECT admin FROM Utilisateur WHERE nom='$login';";
+                $result = mysqli_query($link, $query);
+                $arr = mysqli_fetch_array($result);
+                $admin = $arr["admin"];
+                
                 $this->send($user->socket, "Open bien reçu ");
                 $this->say("FIN TRAITEMENT OPEN");
                 break;
