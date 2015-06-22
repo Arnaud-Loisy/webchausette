@@ -48,51 +48,25 @@ class ChatBot extends WebSocket {
                             $this->disconnect($socketToDisconnect);
                             $this->say("$login est désormais deconnecte !");
                         }
-                        /* $query = "SELECT idSocket FROM Utilisateur WHERE nom='$login';";
-                          $this->say("Requete envoyée = $query");
-                          $result = mysqli_query($link, $query);
-                          $arr = mysqli_fetch_array($result);
-                          $ancienSocket=$arr['idSocket'];
 
-                          $ancienUser=$this->getuserbysocket($ancienSocket);
-
-                         */
-                        /* if($u){
-                          $this->say("$login était deje connecte ailleurs sur le socket $ancienSocket");
-                          // $this->disconnect(8);
-                          //$this->disconnect($assoUsersSockets[);
-                          // $this->disconnect($ancienSocket);
-                          } */
-                        //if($assoUsersSockets[$user->socket]!=null){
-                        //  $this->disconnect($ancienUser->socket);
-                        // Ajout de l'identifiant de socket de l'utilisateur dans la BDD
+                        // Ajout de l'utilisateur dans la base locale
                         $this->assoUsersSockets[$login] = $user->socket;
                         $this->say("> Idsocket ajouté pour $login");
-                        //$idSocketUser = $user->socket;
-                        //$query = "UPDATE Utilisateur SET idSocket='$idSocketUser' WHERE nom='$login';";
-                        //$this->say("AAAAAAAAAAAAAAAAAAAAA : $query");
-                        //$result = mysqli_query($link, $query);
+
                         // Envoi de la liste des utilisateurs déjà connectés
                         // Pour chaque utilisateur connecté
                         $this->say("RENVOI DE LA LISTE DES PERSONNES CONNECTEES");
                         foreach ($this->users as $utilisateur) {
 
-                            // récupérer son login
-                            //$socketCourant = $utilisateur->socket;
-                            //$query = "SELECT nom FROM Utilisateur WHERE idSocket='$socketCourant'";
-                            //$this->say("Requete envoyée : $query");
-                            //$result = mysqli_query($link, $query);
-                            //$arr = mysqli_fetch_array($result);
-                            //$this->say($arr['nom']);
-
+                            // Si le socket est associé à un login dans la base locale
                             if ($connectedUser = array_search($utilisateur->socket, $this->assoUsersSockets)) {
                                 $this->say("$connectedUser fait parti de la liste");
                                 // formater le message d'envoi
-                                //$connectedUserMsg = json_encode("{'type':'connect','login':'" + $connectedUser + "','pwd':''}");
                                 $connectedUserMsgTMP = array('type' => "connect", 'login' => $connectedUser, 'pwd' => "");
                                 $connectedUserMsg = json_encode($connectedUserMsgTMP);
                                 $this->say($connectedUserMsg);
-                                // envoyer au mec nouvellement connecté
+
+                                // envoyer la confirmation de connexion
                                 $this->send($user->socket, $connectedUserMsg);
                             }
                         }
@@ -105,6 +79,32 @@ class ChatBot extends WebSocket {
                                 $this->send($utilisateur->socket, $msg);
                                 //$this->send($utilisateur->socket, "$login s'est connecté !");
                             }
+                        }
+
+                        // Récupération de l'historique
+                        $this->say("ENVOI DE L'HISTORIQUE");
+                        $query = "SELECT * FROM Message WHERE idSalon=0";
+                        $result1 = mysqli_query($link, $query);
+                        while ($arr1=mysqli_fetch_array($result1)) {
+                            $idMsg = $arr1['idMessage'];
+                            $idFrom = $arr1["idUtilisateur"];
+                            $contenu = $arr1['contenu'];
+                            $this->say("Message historisé à traiter numéro $idMsg");
+                            
+                            // Récupération de l'id BDD correspondant au login  
+                            $query = "SELECT nom FROM Utilisateur WHERE idUtilisateur='$idFrom';";
+                            $result = mysqli_query($link, $query);
+                            $arr = mysqli_fetch_array($result);
+                            $loginMsg = $arr['nom'];
+
+                            // Construction du message
+                            $msgTMP = array('type' => 'message', 'from' => "$loginMsg", 'salon' => "global", 'dest' => '', 'message' => "$contenu");
+                            $msg = json_encode($msgTMP);
+
+                            // Envoi du message
+                            $this->say($msg);
+                            $this->send($user->socket, $msg);
+                            $this->say("Fin traitement Message historisé à traiter numéro $idMsg ");
                         }
                     } else { // MDP erroné
                         $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => 'global', 'dest' => '', 'message' => "Erreur d'authentification");
@@ -120,12 +120,8 @@ class ChatBot extends WebSocket {
                     $this->send($utilisateur->socket, $errorMsg);
                     $this->disconnect($user->socket);
                 }
-                //$this->send($user->socket, $msg);
-                //$this->send($user->socket, "Bravo $login, tu t'es bien connecté !");
                 $this->say("FIN TRAITEMENT CONNECT");
                 break;
-
-
 
             case "disconnect":
                 $this->say("DEBUT TRAITEMENT DISCONNECT");
@@ -151,58 +147,83 @@ class ChatBot extends WebSocket {
                 $this->say("FIN TRAITEMENT DISCONNECT");
                 break;
 
-
-
-
             // envoi d'un message
             case "message":
                 $this->say("DEBUT TRAITEMENT MESSAGE");
-                
+
                 $from = $parsedMsg["from"];
                 $dest = $parsedMsg["dest"];
-                $contenu = $parsedMsg["message"];
                 $salon = $parsedMsg["salon"];
+                $contenu = $parsedMsg["message"];
+
+                // Récupération de l'id BDD correspondant au login  
+                $query = "SELECT idUtilisateur FROM Utilisateur WHERE nom='$login';";
+                $result = mysqli_query($link, $query);
+                $arr = mysqli_fetch_array($result);
+                $idFrom = $arr["idUtilisateur"];
 
                 // si origine du message valide
                 if ($this->checkSocket($from, $user->socket)) {
-                    
                     // SI MESSAGE PRIVE
                     if ($dest) {
                         $this->say("MESSAGE PRIVE");
                         // lui transmettre le message
                         $destSocket = $this->assoUsersSockets[$dest];
                         $this->send($destSocket, $msg);
-                    } else { // Si message public
+                    } else { // SI MESSAGE PUBLIC
+              
                         // si le salon est global
-                        if ($salon = "global") {
+                        if ($salon == "global") {
                             $this->say("MESSAGE GLOBAL");
+                            // Ajout du message dans la bdd
+                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ($contenu, 0, $idFrom)";
+                            $result = mysqli_query($link, $query);
+
                             // envoi à tous les clients
                             foreach ($this->users as $utilisateur) {
                                 $this->send($utilisateur->socket, $msg);
                             }
-                        } else { // si c'est un salon particulier
-                        $this->say("MESSAGE SALON $salon");
+                        } else { // SI MESSAGE SALON
+                            $this->say("MESSAGE SALON $salon");
+                            // Ajout du message dans la bdd
+                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ($contenu, 0, $idFrom)";
+                            $result = mysqli_query($link, $query);
+
                             // Récupérer la liste des utilisateurs du salon
-                            $query = "SELECT nom FROM Utilisateur WHERE idSalon='$Salon';";
+                            $this->say("Recup des utilisateurs du salon $salon");
+                            $query = "SELECT nom FROM Utilisateur WHERE idSalon='$salon';";
                             $result = mysqli_query($link, $query);
                             while ($loginCourant = mysqli_fetch_array($result)) {
-                                $socketCourante=$this->assoUsersSockets[$loginCourant];
+                                $socketCourante = $this->assoUsersSockets[$loginCourant];
                                 $this->send($socketCourante, $msg);
                             }
                         }
                     }
-
-                    
                 }
                 $this->say("FIN TRAITEMENT MESSAGE");
                 break;
 
 
             case "open":
+                $this->say("DEBUT TRAITEMENT OPEN");
                 $this->send($user->socket, "Open bien reçu ");
+                $this->say("FIN TRAITEMENT OPEN");
                 break;
             case "close":
+                $this->say("DEBUT TRAITEMENT CLOSE");
                 $this->send($user->socket, "Close bien reçu !");
+                $this->say("FIN TRAITEMENT CLOSE");
+                break;
+
+            case "join":
+                $this->say("DEBUT TRAITEMENT JOIN");
+                $this->send($user->socket, "Open bien reçu ");
+                $this->say("FIN TRAITEMENT JOIN");
+                break;
+            case "quit":
+                $this->say("DEBUT TRAITEMENT QUIT");
+                $this->send($user->socket, "Close bien reçu !");
+                $this->say("FIN TRAITEMENT QUIT");
                 break;
             default:
                 //$this->send($user->socket, "Pas compris mec !");
@@ -211,10 +232,10 @@ class ChatBot extends WebSocket {
     }
 
     function checkSocket($login, $socket) {
-        if ($this->assoUsersSockets[$login] == $socket){
+        if ($this->assoUsersSockets[$login] == $socket) {
             $this->say("CheckSocket OK !");
             return true;
-        }else{
+        } else {
             $this->say("CheckSocket problèmatique... !");
             return false;
         }
