@@ -44,8 +44,18 @@ if ( typeof ws !== 'undefined') {
 			user_nb++;
 			break;
 		case "message":
+		var corres;
+		if (msg.dest != null)
+		{
+			corres = msg.dest;
+		}
+		else{
+			corres = msg.salon;
+		}
 			// Ajout au journal du contenu du message
-			log(msg.from + "< " + msg.message);
+			log(msg.from + " < "+corres +" : "+ texte.value);
+			
+			
 			break;
 		default:
 
@@ -128,11 +138,19 @@ if ( typeof ws !== 'undefined') {
 			dest : dest,
 			message : texte.value
 		};
-
+		
+		var corres;
+		if (msg.dest != null)
+		{
+			corres = msg.dest;
+		}
+		else{
+			corres = msg.salon;
+		}
 		// Envoi du message JSON
 		ws.send(JSON.stringify(msg));
 		console.log(JSON.stringify(msg));
-		log(msg.from + "> " + texte.value);
+		log(msg.from + " > "+corres +" : "+ texte.value);
 		// Mise à zéro du champ et focus
 		texte.focus();
 		texte.value = '';
