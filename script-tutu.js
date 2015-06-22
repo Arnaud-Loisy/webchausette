@@ -16,8 +16,8 @@ if ( typeof ws !== 'undefined') {
 		var login = document.getElementById('login');
 		var msg_connection = {
 			type : "connect",
-			login : "toto",
-			pwd : "toto",
+			login : "tutu",
+			pwd : "tutu",
 
 		};
 
@@ -34,7 +34,7 @@ if ( typeof ws !== 'undefined') {
 		switch(msg.type) {
 		case "connect":
 			// Affichage de l'user qui se connecte
-			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="' + msg.login + '"  name="users" value=' + msg.login + ' />	<label for="' + msg.login + '">' + msg.login + '</label></span><br>\n';
+			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="users"  name="users" value=' + msg.login + ' />	<label for="' + msg.login + '">' + msg.login + '</label></span><br>\n';
 			break;
 		case "message":
 			// Ajout au journal du contenu du message

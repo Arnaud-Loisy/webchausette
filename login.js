@@ -31,24 +31,22 @@ if ( typeof ws !== 'undefined') {
 		default:
 
 		}
-
-		rs.innerHTML = this.readyState;
 	};
 	// Evénement submit du formulaire
-	document.getElementsByTagName('form').onsubmit = function(e) {
-		var texte = document.getElementById('texte');
+	document.getElementById("loginform").onsubmit = function(e) {
+		
 		var login = document.getElementById('login');
 		var mdp = document.getElementById('mdp');
 		var msg_connection = {
 			type : "connect",
-			login : login,
-			pwd : mdp,
-
+			login : login.value,
+			pwd : login.value
 		};
 
 
 		// Envoi du message JSON
 		ws.send(JSON.stringify(msg_connection));
+		window.alert(JSON.stringify(msg_connection));
 
 		
 		// Empêche de valider le formulaire
@@ -56,4 +54,4 @@ if ( typeof ws !== 'undefined') {
 	};
 } else {
 	alert("Ce navigateur ne supporte pas Web Sockets");
-}
+};
