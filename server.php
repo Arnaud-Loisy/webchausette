@@ -157,9 +157,11 @@ class ChatBot extends WebSocket {
                 $contenu = $parsedMsg["message"];
 
                 // Récupération de l'id BDD correspondant au login  
-                $query = "SELECT idUtilisateur FROM Utilisateur WHERE nom='$login';";
+                $query = "SELECT idUtilisateur FROM Utilisateur WHERE nom='$from';";
+                $this->say("Recherche $from dans BD : $query");
                 $result = mysqli_query($link, $query);
                 $arr = mysqli_fetch_array($result);
+                $this->say("idFROM = "+$arr['idUtilisateur']);
                 $idFrom = $arr["idUtilisateur"];
 
                 // si origine du message valide
@@ -177,11 +179,13 @@ class ChatBot extends WebSocket {
                             $this->say("MESSAGE GLOBAL");
                             // Ajout du message dans la bdd
                             $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ($contenu, 0, $idFrom)";
+                             $this->say("Ecriture MESSAGE GLOBAL BD : $query");
                             $result = mysqli_query($link, $query);
 
-                            // envoi à tous les clients
+                            // envoi à tous les autres clients
                             foreach ($this->users as $utilisateur) {
-                                $this->send($utilisateur->socket, $msg);
+                                if($utilisateur->socket!=$user->socket)
+                                    $this->send($utilisateur->socket, $msg);
                             }
                         } else { // SI MESSAGE SALON
                             $this->say("MESSAGE SALON $salon");
@@ -195,7 +199,8 @@ class ChatBot extends WebSocket {
                             $result = mysqli_query($link, $query);
                             while ($loginCourant = mysqli_fetch_array($result)) {
                                 $socketCourante = $this->assoUsersSockets[$loginCourant];
-                                $this->send($socketCourante, $msg);
+                                if($socketCourante->socket!=$user->socket)
+                                    $this->send($socketCourante, $msg);
                             }
                         }
                     }
