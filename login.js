@@ -1,4 +1,6 @@
-var ws = null;
+window.onload = function  () {
+
+ ws = null;
 // Création d'un nouveau socket
 // (Pour Mozilla < 11 avec version préfixée)
 if ('MozWebSocket' in window) {
@@ -25,33 +27,41 @@ if ( typeof ws !== 'undefined') {
 		case "connect":
 			// Affichage de l'user qui se connecte
 			if (msg.login==document.getElementById('login')){
-				  document.location.href="chat.html" ;
+				  window.location.href="chat.html" ;
 			}
 			
 		default:
+		console.log(msg);
 
 		}
 	};
-	// Evénement submit du formulaire
-	document.getElementById("loginform").onsubmit = function(e) {
+	
+} else {
+	alert("Ce navigateur ne supporte pas Web Sockets");
+};
+};
+function formlog (e) {
+  // Evénement submit du formulaire
+	//document.getElementsByTagName('form')[0].onsubmit = function(e) {
 		
-		var login = document.getElementById('login');
+		console.log("e="+e);
+		login=document.getElementById('login');
+		console.log("login="+login.value);
 		var mdp = document.getElementById('mdp');
+		console.log("mdp="+mdp.value);
 		var msg_connection = {
 			type : "connect",
 			login : login.value,
-			pwd : login.value
+			pwd : mdp.value
 		};
 
 
 		// Envoi du message JSON
 		ws.send(JSON.stringify(msg_connection));
-		window.alert(JSON.stringify(msg_connection));
+		console.log(JSON.stringify(msg_connection));
 
 		
 		// Empêche de valider le formulaire
-		e.preventDefault();
-	};
-} else {
-	alert("Ce navigateur ne supporte pas Web Sockets");
-};
+		//e.preventDefault();
+	//};
+}

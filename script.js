@@ -13,11 +13,14 @@ if ( typeof ws !== 'undefined') {
 	// Lors de l'ouverture de connexion
 	ws.onopen = function() {
 		log("Socket ouvert");
+		//window.login = '<?=$_POST['login']?>';
+		//window.pwd = '<?=$_POST['pwd']?>';
 		var login = document.getElementById('login');
+		var pwd = document.getElementById('pwd');
 		var msg_connection = {
 			type : "connect",
-			login : "toto",
-			pwd : "toto",
+			login : login.value,
+			pwd : pwd.value
 
 		};
 
@@ -114,7 +117,7 @@ if ( typeof ws !== 'undefined') {
 
 		console.log("dest=" + dest);
 		console.log("salon=" + salon);
-
+		
 		var login = document.getElementById('login');
 		var msg = {
 			type : "message",

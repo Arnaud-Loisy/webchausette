@@ -1,15 +1,23 @@
 <!doctype html>
 <html lang="fr">
 	<head>
+		<?php
+		session_start();
+		echo '<div id="login">' . $_POST["login"] . '</div>';
+		echo '<div id="login">' . $_POST["mdp"] . '</div>';
+		?>
 		<title>WebCat</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="styles.css" type="text/css">
-		
+
 	</head>
 	<body>
 		<div class="wrap">
 			<div name="users" id="users">
-				<span class="checkB"><input type="radio" id="global" name="users" value="global" />	<label for="global">global</label></span><br>
+				<span class="checkB">
+					<input type="radio" id="global" name="users" value="global" checked="checked" />
+					<label for="global">global</label></span>
+				<br>
 			</div>
 			<form>
 				<p id="readyState">
@@ -20,7 +28,7 @@
 					<strong>Journal</strong>
 				</p>
 				<div name="log" id="log">
-					
+
 				</div>
 				<p>
 					<label for="texte">Envoyer</label>
@@ -40,7 +48,7 @@
 				</ul>
 			</form>
 		</div>
-		<script type="text/javascript" src="script.js"></script>	
-		
-		</body>
+		<script type="text/javascript" src="script.js"></script>
+
+	</body>
 </html>
