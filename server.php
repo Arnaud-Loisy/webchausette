@@ -114,11 +114,11 @@ class ChatBot extends WebSocket {
                         $this->disconnect($user->socket);
                     }
                 } else { // Login inconnu
-                   $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => 'global', 'dest' => '', 'message' => "Erreur d'authentification");
-                        $disconnectMsg = json_encode($errorMsgTMP);
-                        $this->say($errorMsg);
-                        $this->send($utilisateur->socket, $errorMsg);
-                        $this->disconnect($user->socket);
+                    $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => 'global', 'dest' => '', 'message' => "Erreur d'authentification");
+                    $disconnectMsg = json_encode($errorMsgTMP);
+                    $this->say($errorMsg);
+                    $this->send($utilisateur->socket, $errorMsg);
+                    $this->disconnect($user->socket);
                 }
                 //$this->send($user->socket, $msg);
                 //$this->send($user->socket, "Bravo $login, tu t'es bien connecté !");
@@ -156,32 +156,45 @@ class ChatBot extends WebSocket {
 
             // envoi d'un message
             case "message":
+                $this->say("DEBUT TRAITEMENT MESSAGE");
+                
                 $from = $parsedMsg["from"];
                 $dest = $parsedMsg["dest"];
                 $contenu = $parsedMsg["message"];
                 $salon = $parsedMsg["salon"];
 
                 // si origine du message valide
-                /* if ($this->checkSocket($from, $user->socket)) {
-                  // SI MESSAGE PRIVE
-                  if () {
+                if ($this->checkSocket($from, $user->socket)) {
+                    
+                    // SI MESSAGE PRIVE
+                    if ($dest) {
+                        $this->say("MESSAGE PRIVE");
+                        // lui transmettre le message
+                        $destSocket = $this->assoUsersSockets[$dest];
+                        $this->send($destSocket, $msg);
+                    } else { // Si message public
+                        // si le salon est global
+                        if ($salon = "global") {
+                            $this->say("MESSAGE GLOBAL");
+                            // envoi à tous les clients
+                            foreach ($this->users as $utilisateur) {
+                                $this->send($utilisateur->socket, $msg);
+                            }
+                        } else { // si c'est un salon particulier
+                        $this->say("MESSAGE SALON $salon");
+                            // Récupérer la liste des utilisateurs du salon
+                            $query = "SELECT nom FROM Utilisateur WHERE idSalon='$Salon';";
+                            $result = mysqli_query($link, $query);
+                            while ($loginCourant = mysqli_fetch_array($result)) {
+                                $socketCourante=$this->assoUsersSockets[$loginCourant];
+                                $this->send($socketCourante, $msg);
+                            }
+                        }
+                    }
 
-                  } else { // SI MESSAGE PUBLIC
-                  // Récupérer le num du salon concerné
-                  $numSalon;
-
-                  // Récupérer la liste des utilisateurs du salon
-                  $link = connectBDD();
-                  $query = requeteUtilisateursDuSalon($numSalon);
-                  $result = mysqli_query($link, $query);
-                  while ($utilisateurCourant = mysqli_fetch_array($result)) {
-                  $socket = $this->getuserbysocket($utilisateurCourant["idSocket"]);
-                  $this->send($socket, "TEST");
-                  }
-                  } */
-                foreach ($this->users as $utilisateur) {
-                    $this->send($utilisateur->socket, $msg);
+                    
                 }
+                $this->say("FIN TRAITEMENT MESSAGE");
                 break;
 
 
@@ -192,16 +205,19 @@ class ChatBot extends WebSocket {
                 $this->send($user->socket, "Close bien reçu !");
                 break;
             default:
-                $this->send($user->socket, "Pas compris mec !");
+                //$this->send($user->socket, "Pas compris mec !");
                 break;
         }
     }
 
     function checkSocket($login, $socket) {
-        if ($this->assoUsersSockets[$login] == $socket)
+        if ($this->assoUsersSockets[$login] == $socket){
+            $this->say("CheckSocket OK !");
             return true;
-        else
+        }else{
+            $this->say("CheckSocket problèmatique... !");
             return false;
+        }
     }
 
 }
