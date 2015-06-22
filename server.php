@@ -22,8 +22,8 @@ class ChatBot extends WebSocket {
         $pwd=$parsedMsg["pwd"];
         
         // Connexion à la bdd
-        $link = mysqli_connect('192.168.0.2', 'projet', 'projet', 'webchaussette');
-        //$link = mysqli_connect('www.remi-boyer.fr', 'projet', 'projet', 'webchaussette');
+        //$link = mysqli_connect('192.168.0.2', 'projet', 'projet', 'webchaussette');
+        $link = mysqli_connect('www.remi-boyer.fr', 'projet', 'projet', 'webchaussette');
         
         // Traitement fonction du type du message
         $this->say("> Type du message reçu : " .$type );
