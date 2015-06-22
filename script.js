@@ -17,12 +17,12 @@ if ( typeof ws !== 'undefined') {
 		//window.pwd = '<?=$_POST['pwd']?>';
 		var login = document.getElementById('login');
 		var pwd = document.getElementById('pwd');
-		log.console("login.value :"+login.value);
-		log.console("pwd.value :"+pwd.value);
+		console.log("login.value :"+login.innerText);
+		console.log("pwd.value :"+pwd.innerText);
 		var msg_connection = {
 			type : "connect",
-			login : login.value,
-			pwd : pwd.value
+			login : login.innerText,
+			pwd : pwd.innerText
 
 		};
 
@@ -133,7 +133,7 @@ if ( typeof ws !== 'undefined') {
 		var login = document.getElementById('login');
 		var msg = {
 			type : "message",
-			from : "login",
+			from : login.innerText,
 			salon : salon,
 			dest : dest,
 			message : texte.value
