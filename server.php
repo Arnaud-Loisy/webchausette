@@ -38,10 +38,53 @@ class ChatBot extends WebSocket {
                 if ($arr = mysqli_fetch_array($result)) {
                     // Si le mot de passe est OK
                     if ($arr["mdp"] == $pwd) {
-                        // Ajout de l'identifiant de socket de l'utilisateur dans la BDD
-                        $query = "UPDATE Utilisateur SET idSocket='"+$user->socket+"' WHERE nom='$login';";
+                        
+                        /*// Si un socket est déjà ouvert pour cet utilisateur, fermeture de ce dernier
+                        $this->say("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA Verification si $login est deja connecté");
+                        $query = "SELECT idSocket FROM Utilisateur WHERE nom='$login';";
+                        $this->say("Requete envoyée = $query");
+                        $result = mysqli_query($link, $query);
+                        $arr = mysqli_fetch_array($result);
+                        $ancienSocket=$arr['idSocket'];
+                        if($ancienSocket !=''){
+                            $this->say("$login était deje connecte ailleurs sur le socket $ancienSocket");
+                            $this->disconnect($ancienSocket);
+                        }*/
+                        
+                         // Ajout de l'identifiant de socket de l'utilisateur dans la BDD
+                        $idSocketUser = $user->socket;
+                        $query = "UPDATE Utilisateur SET idSocket='$idSocketUser' WHERE nom='$login';";
+                        //$this->say("AAAAAAAAAAAAAAAAAAAAA : $query");
                         $result = mysqli_query($link, $query);
                         $this->say("> Idsocket ajouté pour $login");
+                       
+                                
+                        // Envoi de la liste des utilisateurs déjà connectés
+                        // Pour chaque utilisateur connecté
+                        $this->say("Liste des connectés actuel");
+                    
+                        foreach ($this->users as $utilisateur) {
+                            
+                            // récupérer son login
+                            $socketCourant = $utilisateur->socket;
+                            $query = "SELECT nom FROM Utilisateur WHERE idSocket='$socketCourant'";
+                            $this->say("Requete envoyée : $query");
+                            $result = mysqli_query($link, $query);
+                            $arr = mysqli_fetch_array($result);
+                            
+                            $this->say($arr['nom']);
+                             
+                            // formater le message d'envoi
+                            $connectedUser = json_encode("{'type':'connect','login':'"+$arr['nom']+"','pwd':''}");
+                            
+                           
+                            
+                            // envoyer au mec nouvellement connecté
+                            $this->send($user->socket, $connectedUser);
+                            
+                        }
+
+                       
                         
                         // Notification de nouvelle connexion à tous les clients connectés
                         $this->say("RENVOI DU MESSAGE A TOUS LES CLIENTS");
@@ -50,7 +93,7 @@ class ChatBot extends WebSocket {
                             $this->send($utilisateur->socket, "$login s'est connecté !");
                         }
                    } else { // MDP erroné
-                       
+                       $this->say("> MDP erroné pour $login");
                    }
                 } else { // Login inconnu
                     
