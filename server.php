@@ -77,6 +77,11 @@ class ChatBot extends WebSocket {
                             if ($utilisateur->socket != $user->socket) {
 
                                 $this->send($utilisateur->socket, $msg);
+
+                                $connectMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => 'global', 'dest' => '', 'message' => "$login vient de se connecter");
+                                $connectMsg = json_encode($connectMsgTMP);
+                                $this->say("$connectMsg");
+                                $this->send($utilisateur->socket, $connectMsg);
                                 //$this->send($utilisateur->socket, "$login s'est connecté !");
                             }
                         }
@@ -110,12 +115,12 @@ class ChatBot extends WebSocket {
                         $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Erreur d'authentification");
                         $errorMsg = json_encode($errorMsgTMP);
                         $this->say("$errorMsg");
-                        $this->send($utilisateur->socket, $errorMsg);
+                        $this->send($user->socket, $errorMsg);
                         $this->disconnect($user->socket);
                     }
                 } else { // Login inconnu
                     $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Erreur d'authentification");
-                    $disconnectMsg = json_encode($errorMsgTMP);
+                    $errorMsg = json_encode($errorMsgTMP);
                     $this->say($errorMsg);
                     $this->send($utilisateur->socket, $errorMsg);
                     $this->disconnect($user->socket);
@@ -136,7 +141,7 @@ class ChatBot extends WebSocket {
                         $disconnectMsg = json_encode($disconnectMsgTMP);
                         $this->say("$disconnectMsg");
 
-                        $this->send($utilisateur->socket, $disconnectMsg); 
+                        $this->send($utilisateur->socket, $disconnectMsg);
                         $this->send($utilisateur->socket, $msg);
                     }
                     // Suppression du socket dans la table
@@ -172,7 +177,7 @@ class ChatBot extends WebSocket {
                         $this->say("MESSAGE PRIVE");
                         // lui transmettre le message
                         $destSocket = $this->assoUsersSockets[$dest];
-                        if($this->getuserbysocket($destSocket)){
+                        if ($this->getuserbysocket($destSocket)) {
                             $this->send($destSocket, $msg);
                         }
                     } else { // SI MESSAGE PUBLIC
@@ -243,10 +248,10 @@ class ChatBot extends WebSocket {
                         // Si le salon est fermé
                         if ($etatSalon == 0) {
                             // Modification du statut du salon dans la BD
-                            $query="UPDATE Salon SET ouvert = '1' WHERE idSalon = '$salon'";
+                            $query = "UPDATE Salon SET ouvert = '1' WHERE idSalon = '$salon'";
                             $this->say("Modification de l'état du salon $salon : $query");
                             $result = mysqli_query($link, $query);
-                            
+
                             // Construction du message d'ouverture
                             $msgOpenTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => 'global', 'dest' => "", 'message' => "Le salon $salon est désormais ouvert !");
                             $msgOpen = json_encode($msgOpenTMP);
@@ -305,10 +310,10 @@ class ChatBot extends WebSocket {
                         // Si le salon est ouvert
                         if ($etatSalon == 1) {
                             // Modification du statut du salon dans la BD
-                            $query="UPDATE Salon SET ouvert = '0' WHERE idSalon = '$salon'";
+                            $query = "UPDATE Salon SET ouvert = '0' WHERE idSalon = '$salon'";
                             $this->say("Modification de l'état du salon $salon : $query");
                             $result = mysqli_query($link, $query);
-                            
+
                             // Construction du message de fermeture
                             $msgOpenTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => 'global', 'dest' => "", 'message' => "Le salon $salon est désormais fermé !");
                             $msgOpen = json_encode($msgOpenTMP);
@@ -337,30 +342,141 @@ class ChatBot extends WebSocket {
 
             case "join":
                 $this->say("DEBUT TRAITEMENT JOIN");
-                
+
                 // Récupération des champs
-                 $login = $parsedMsg["from"];
-                if ($parsedMsg["salon"] == 0)
-                    $salon = 'global';
+                $login = $parsedMsg["from"];
+                if ($parsedMsg["salon"] == 'global')
+                    $salon = 0;
                 else
                     $salon = $parsedMsg["salon"];
-                
+
                 // Récupération de l'état du salon
-                
-                
+                $query = "SELECT ouvert FROM Salon WHERE idSalon='$salon'";
+                $result = mysqli_query($link, $query);
+                $arr = mysqli_fetch_array($result);
+                $etatSalon = $arr["ouvert"];
+
                 // Si le salon est ouvert
-                
-                // Si le salon est fermé
-                
+                if ($etatSalon == 1) {
+                    // Modification du statut de l'utilisateur dans la DB
+                    $query = "UPDATE Utilisateur SET idSalon = '$salon' WHERE nom = '$login'";
+                    $this->say("Modification du salon de l'utilisateur $salon vers $salon : $query");
+                    $result = mysqli_query($link, $query);
+
+
+                    // Renvoi de la notif de "join" à l'utilisateur
+                    $this->send($user->socket, $msg);
+
+                    // Renvoi de l'historique du salon
+                    // Récupération de l'historique
+                    $this->say("ENVOI DE L'HISTORIQUE");
+                    $query = "SELECT * FROM Message WHERE idSalon=$salon";
+                    $result1 = mysqli_query($link, $query);
+                    while ($arr1 = mysqli_fetch_array($result1)) {
+                        $idMsg = $arr1['idMessage'];
+                        $idFrom = $arr1["idUtilisateur"];
+                        $contenu = $arr1['contenu'];
+                        $this->say("Message historisé à traiter numéro $idMsg");
+
+                        // Récupération de l'id BDD correspondant au login  
+                        $query = "SELECT nom FROM Utilisateur WHERE idUtilisateur='$idFrom';";
+                        $result = mysqli_query($link, $query);
+                        $arr = mysqli_fetch_array($result);
+                        $loginMsg = $arr['nom'];
+
+                        // Construction du message
+                        $msgTMP = array('type' => 'message', 'from' => "$loginMsg", 'salon' => "global", 'dest' => '', 'message' => "$contenu");
+                        $msg = json_encode($msgTMP);
+
+                        // Envoi du message
+                        $this->say($msg);
+                        $this->send($user->socket, $msg);
+                        $this->say("Fin traitement Message historisé à traiter numéro $idMsg ");
+                    }
+
+                    // Récupérer la liste des utilisateurs du salon
+                    $this->say("Recup des utilisateurs du salon $salon");
+                    $query = "SELECT nom FROM Utilisateur WHERE idSalon='$salon';";
+                    $result = mysqli_query($link, $query);
+
+                    // Envoyer le message de "join" à tous les membres
+                    while ($loginCourant = mysqli_fetch_array($result)) {
+                        $socketCourante = $this->assoUsersSockets[$loginCourant];
+                        if ($socketCourante->socket != $user->socket) {
+                            $this->send($socketCourante, $msg);
+
+                            $joinMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => "$salon", 'dest' => "", 'message' => "$login a rejoint le salon $salon");
+                            $joinMsg = json_encode($joinMsgTMP);
+                            $this->say($joinMsg);
+                            $this->send($user->socket, $joinMsg);
+                        }
+                    }
+                } else { // Si le salon est ouvert
+                    $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Le salon $salon est déjà fermé !");
+                    $disconnectMsg = json_encode($errorMsgTMP);
+                    $this->say($errorMsg);
+                    $this->send($user->socket, $errorMsg);
+                }
                 $this->say("FIN TRAITEMENT JOIN");
                 break;
             case "quit":
                 $this->say("DEBUT TRAITEMENT QUIT");
-                $this->send($user->socket, "Close bien reçu !");
+
+                // Récupération des champs
+                $login = $parsedMsg["from"];
+                if ($parsedMsg["salon"] == 'global')
+                    $salon = 0;
+                else
+                    $salon = $parsedMsg["salon"];
+
+                // Récupération de l'état du salon
+                $query = "SELECT ouvert FROM Salon WHERE idSalon='$salon'";
+                $result = mysqli_query($link, $query);
+                $arr = mysqli_fetch_array($result);
+                $etatSalon = $arr["ouvert"];
+
+                // Si le salon est ouvert
+                if ($etatSalon == 1) {
+                    // Modification du salon de l'utilisateur dans al DB
+                    $query = "UPDATE Utilisateur SET idSalon = '$salon' WHERE nom = '$login'";
+                    $this->say("Modification du salon de l'utilisateur $salon vers $salon : $query");
+                    $result = mysqli_query($link, $query);
+
+
+
+
+                    // Récupérer la liste des utilisateurs du salon
+                    $this->say("Recup des utilisateurs du salon $salon");
+                    $query = "SELECT nom FROM Utilisateur WHERE idSalon='$salon';";
+                    $result = mysqli_query($link, $query);
+
+                    // Envoyer le message de "quit" à tous les membres
+                    while ($loginCourant = mysqli_fetch_array($result)) {
+                        $socketCourante = $this->assoUsersSockets[$loginCourant];
+
+                        $this->send($socketCourante, $msg);
+
+                        $quitMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => "$salon", 'dest' => "", 'message' => "$login a quitté le salon $salon");
+                        $quitMsg = json_encode($quitMsgTMP);
+                        $this->say($quitMsg);
+                        $this->send($user->socket, $quitMsg);
+                    }
+                } else { // Si le salon est ouvert
+                    $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Le salon $salon est déjà fermé !");
+                    $disconnectMsg = json_encode($errorMsgTMP);
+                    $this->say($errorMsg);
+                    $this->send($user->socket, $errorMsg);
+                }
+
+
+
                 $this->say("FIN TRAITEMENT QUIT");
                 break;
             default:
-                //$this->send($user->socket, "Pas compris mec !");
+                $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Tu m'as envoyé un message pas formaté : $msg");
+                $disconnectMsg = json_encode($errorMsgTMP);
+                $this->say($errorMsg);
+                $this->send($user->socket, $errorMsg);
                 break;
         }
     }
