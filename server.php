@@ -159,7 +159,12 @@ class ChatBot extends WebSocket {
 
                 $from = $parsedMsg["from"];
                 $dest = $parsedMsg["dest"];
-                $salon = $parsedMsg["salon"];
+
+                if ($parsedMsg["salon"] == 'global')
+                    $salon = 0;
+                else
+                    $salon = $parsedMsg["salon"];
+
                 $contenu = $parsedMsg["message"];
 
                 // Récupération de l'id BDD correspondant au login  
@@ -184,20 +189,33 @@ class ChatBot extends WebSocket {
                         // si le salon est global
                         if ($salon == "global") {
                             $this->say("MESSAGE GLOBAL");
-                            // Ajout du message dans la bdd
-                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ('$contenu', 0, $idFrom)";
-                            $this->say("Ecriture MESSAGE GLOBAL BD : $query");
+                            // Récupération de l'état du salon
+                            $query = "SELECT ouvert FROM Salon WHERE idSalon='0'";
                             $result = mysqli_query($link, $query);
+                            $arr = mysqli_fetch_array($result);
+                            $etatSalon = $arr["ouvert"];
 
-                            // envoi à tous les autres clients
-                            foreach ($this->users as $utilisateur) {
-                                if ($utilisateur->socket != $user->socket)
-                                    $this->send($utilisateur->socket, $msg);
+                            if ($etatSalon == 1) {
+                                // Ajout du message dans la bdd
+                                $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ('$contenu', 0, $idFrom)";
+                                $this->say("Ecriture MESSAGE GLOBAL BD : $query");
+                                $result = mysqli_query($link, $query);
+
+                                // envoi à tous les autres clients
+                                foreach ($this->users as $utilisateur) {
+                                    if ($utilisateur->socket != $user->socket)
+                                        $this->send($utilisateur->socket, $msg);
+                                }
+                            } else {
+                                $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Le salon $salon est fermé. Les messages ne seront pas retransmis.");
+                                $errorMsg = json_encode($errorMsgTMP);
+                                $this->say("$errorMsg");
+                                $this->send($user->socket, $errorMsg);
                             }
                         } else { // SI MESSAGE SALON
                             $this->say("MESSAGE SALON $salon");
                             // Ajout du message dans la bdd
-                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ('$contenu', 0, $idFrom)";
+                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ('$contenu', '$salon', '$idFrom')";
                             $result = mysqli_query($link, $query);
 
                             // Récupérer la liste des utilisateurs du salon
