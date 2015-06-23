@@ -43,6 +43,12 @@ if ( typeof ws !== 'undefined') {
 			// Affichage de l'user qui se connecte
 			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="' + user_nb + '"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span><br>\n';
 			user_nb++;
+			if (msg.admin == "1") {
+				document.getElementById('buttons').innerHTML = '<input class="boutonCenter" onclick="ouvrir()" value="ouvrir le salon" type="button">';
+				document.getElementById('buttons').innerHTML += '<input class="boutonCenter" onclick="fermer()" value="fermer le salon" type="button">';
+				document.getElementById('buttons').innerHTML += '<input class="boutonCenter" onclick="quit()" value="quit" type="button">';
+			}
+
 			break;
 		case "message":
 			var corres;
@@ -56,21 +62,38 @@ if ( typeof ws !== 'undefined') {
 
 			break;
 		case "disconnect":
-		
-			for ( i = 0; i < 9; i++) {
-				//lettre = '"'+i+'"';
-				
-				console.log("i= "+i.toString);
-				console.log("mec déco à enlever :"+msg.login);
-				var remove = document.getElementById(i.toString);
-				console.log("remove.value :"+remove.value);
-				if (remove.value == msg.login) {
-					console.log("remove.value :"+remove.value +"match");
-					remove.parentNode.removeChild(remove);
-					removeElem('label','for',i.toString);
-					break;
+
+			x = document.getElementsByName('users');
+			var i;
+			for ( i = 0; i < x.length; i++) {
+				if (x[i].value == msg.login) {
+					console.log("x[i].value == msg.login ="+msg.login);
+					lettre = "'" + i.toString() + "'";
+
+					//while (x[i].firstChild) {
+
+						//x[i].removeChild(x[i].firstChild);
+					//}
+					//x[i].parentNode.removeChild(x[i]);
+					x[i].innerHTML = '';
+					//removeElem('label','for',lettre);
 				}
 			}
+
+			/*	for ( i = 0; i < 9; i++) {
+			 lettre="'"+i.toString()+"'";
+
+			 console.log("i=["+lettre+"]");
+			 console.log("mec déco à enlever :"+msg.login);
+			 var remove = document.getElementById(lettre);
+			 console.log("remove.value :"+remove.value);
+			 if (remove.value == msg.login) {
+			 console.log("remove.value :"+remove.value +"match");
+			 remove.parentNode.removeChild(remove);
+			 removeElem('label','for',lettre);
+			 break;
+			 }
+			 }*/
 
 			break;
 		default:
@@ -180,8 +203,25 @@ function log(txt) {
 	document.getElementById('log').innerHTML += txt + "<br>\n";
 }
 
-function join() {
+function ouvrir() {
+	var login = document.getElementById('login');
+	var open_msg = {
+		type : "open",
+		from : login.innerText
+	};
+	ws.send(JSON.stringify(open_msg));
+	console.log(JSON.stringify(open_msg));
 
+}
+
+function fermer() {
+	var login = document.getElementById('login');
+	var close_msg = {
+		type : "close",
+		from : login.innerText
+	};
+	ws.send(JSON.stringify(close_msg));
+	console.log(JSON.stringify(close_msg));
 }
 
 function quit() {
@@ -203,17 +243,17 @@ function sleep(milliseconds) {
 		}
 	}
 }
-function removeElem(tag,atr,vl)
-{
-    var els = document.getElementsByTagName(tag);
-    vl=vl.toString();
-    for (var i = 0; i<els.length; i++) {
-    var elem=els[i];
-    if(elem.getAttribute(atr)){
-    if ( elem.getAttribute(atr).toString()==vl){
-    elem.remove();
-    return;
-    }
-    }
-    }
+
+function removeElem(tag, atr, vl) {
+	var els = document.getElementsByTagName(tag);
+	vl = vl.toString();
+	for (var i = 0; i < els.length; i++) {
+		var elem = els[i];
+		if (elem.getAttribute(atr)) {
+			if (elem.getAttribute(atr).toString() == vl) {
+				elem.remove();
+				return;
+			}
+		}
+	}
 }
