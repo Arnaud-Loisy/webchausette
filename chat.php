@@ -17,7 +17,7 @@
 			<div name="users" id="users">
 				<span class="checkB">
 					<input type="radio" id="global" name="users" value="global" checked="checked" />
-					<label for="global">global</label></span>
+					<label for="global" style="color: #369;">global</label></span>
 				<br>
 			</div>
 			<form>
