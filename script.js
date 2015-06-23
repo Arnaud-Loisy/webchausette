@@ -41,7 +41,7 @@ if ( typeof ws !== 'undefined') {
 		case "connect":
 			//alert("avant ajout user");
 			// Affichage de l'user qui se connecte
-			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="' + user_nb + '"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span><br>\n';
+			document.getElementById('users').innerHTML += '<span class="checkB"><br><input type="radio" id="' + user_nb + '"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span>';
 			user_nb++;
 			if (msg.admin == "1") {
 				document.getElementById('buttons').innerHTML = '<input class="boutonCenter" onclick="ouvrir()" value="ouvrir le salon" type="button">';
@@ -75,7 +75,7 @@ if ( typeof ws !== 'undefined') {
 						//x[i].removeChild(x[i].firstChild);
 					//}
 					//x[i].parentNode.removeChild(x[i]);
-					x[i].innerHTML = '';
+					x[i].parentNode.innerHTML = '';
 					//removeElem('label','for',lettre);
 				}
 			}
