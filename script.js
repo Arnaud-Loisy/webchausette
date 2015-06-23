@@ -17,8 +17,8 @@ if ( typeof ws !== 'undefined') {
 		//window.pwd = '<?=$_POST['pwd']?>';
 		var login = document.getElementById('login');
 		var pwd = document.getElementById('pwd');
-		console.log("login.value :"+login.innerText);
-		console.log("pwd.value :"+pwd.innerText);
+		console.log("login.value :" + login.innerText);
+		console.log("pwd.value :" + pwd.innerText);
 		var msg_connection = {
 			type : "connect",
 			login : login.innerText,
@@ -34,38 +34,44 @@ if ( typeof ws !== 'undefined') {
 	};
 	// Lors de la réception d'un message
 	ws.onmessage = function(e) {
-
+		console.log("Received : " + e.data);
 		var msg = JSON.parse(e.data);
+
 		switch(msg.type) {
 		case "connect":
 			//alert("avant ajout user");
 			// Affichage de l'user qui se connecte
-			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="'+user_nb+'"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span><br>\n';
+			document.getElementById('users').innerHTML += '<span class="checkB"><input type="radio" id="' + user_nb + '"  name="users" value="' + msg.login + '" />	<label for="' + user_nb + '">' + msg.login + '</label></span><br>\n';
 			user_nb++;
 			break;
 		case "message":
-		var corres;
-		if (msg.dest !== "")
-		{
-			corres = msg.dest;
-		}
-		else{
-			corres = msg.salon;
-		}
+			var corres;
+			if (msg.dest !== "") {
+				corres = msg.dest;
+			} else {
+				corres = msg.salon;
+			}
 			// Ajout au journal du contenu du message
-			log(msg.from +" -> "+corres +" : "+ msg.message);
-			
-			
+			log(msg.from + " -> " + corres + " : " + msg.message);
+
 			break;
-			case "disconect":
-			for (i = 0; i < 9; i++) { 
-    var remove=document.getElementById(i);
-    if (remove.value==msg.login){
-    	remove.parentNode.removeChild(remove);
-    }
-}
-			
-	
+		case "disconnect":
+		
+			for ( i = 0; i < 9; i++) {
+				//lettre = '"'+i+'"';
+				
+				console.log("i= "+i.toString);
+				console.log("mec déco à enlever :"+msg.login);
+				var remove = document.getElementById(i.toString);
+				console.log("remove.value :"+remove.value);
+				if (remove.value == msg.login) {
+					console.log("remove.value :"+remove.value +"match");
+					remove.parentNode.removeChild(remove);
+					removeElem('label','for',i.toString);
+					break;
+				}
+			}
+
 			break;
 		default:
 
@@ -139,7 +145,7 @@ if ( typeof ws !== 'undefined') {
 
 		console.log("dest=" + dest);
 		console.log("salon=" + salon);
-		
+
 		var login = document.getElementById('login');
 		var msg = {
 			type : "message",
@@ -148,20 +154,18 @@ if ( typeof ws !== 'undefined') {
 			dest : dest,
 			message : texte.value
 		};
-		
+
 		var corres;
-		if (msg.dest !== "")
-		{
+		if (msg.dest !== "") {
 			corres = msg.dest;
-		}
-		else{
+		} else {
 			corres = msg.salon;
 		}
 		// Envoi du message JSON
 		ws.send(JSON.stringify(msg));
 		console.log(JSON.stringify(msg));
 		//log(msg.from + " -> "+corres +" >: "+ texte.value);
-                log(msg.from + " -> "+corres+" : "+texte.value);
+		log(msg.from + " -> " + corres + " : " + texte.value);
 		// Mise à zéro du champ et focus
 		texte.focus();
 		texte.value = '';
@@ -175,26 +179,41 @@ if ( typeof ws !== 'undefined') {
 function log(txt) {
 	document.getElementById('log').innerHTML += txt + "<br>\n";
 }
+
 function join() {
-	
+
 }
-function quit(){
+
+function quit() {
 	var login = document.getElementById('login');
 	var quit_msg = {
-			type : "disconnect",
-			login : login.innerText
-		};
-		ws.send(JSON.stringify(quit_msg));
-		console.log(JSON.stringify(quit_msg));
-		window.location.href = "index.html";
+		type : "disconnect",
+		login : login.innerText
+	};
+	ws.send(JSON.stringify(quit_msg));
+	console.log(JSON.stringify(quit_msg));
+	window.location.href = "index.html";
 }
 
-
 function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds) {
-            break;
-        }
+	var start = new Date().getTime();
+	for (var i = 0; i < 1e7; i++) {
+		if ((new Date().getTime() - start) > milliseconds) {
+			break;
+		}
+	}
+}
+function removeElem(tag,atr,vl)
+{
+    var els = document.getElementsByTagName(tag);
+    vl=vl.toString();
+    for (var i = 0; i<els.length; i++) {
+    var elem=els[i];
+    if(elem.getAttribute(atr)){
+    if ( elem.getAttribute(atr).toString()==vl){
+    elem.remove();
+    return;
+    }
+    }
     }
 }
