@@ -178,8 +178,8 @@ class ChatBot extends WebSocket {
                         if ($salon == "global") {
                             $this->say("MESSAGE GLOBAL");
                             // Ajout du message dans la bdd
-                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ($contenu, 0, $idFrom)";
-                             $this->say("Ecriture MESSAGE GLOBAL BD : $query");
+                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ('$contenu', 0, $idFrom)";
+                            $this->say("Ecriture MESSAGE GLOBAL BD : $query");
                             $result = mysqli_query($link, $query);
 
                             // envoi à tous les autres clients
@@ -190,7 +190,7 @@ class ChatBot extends WebSocket {
                         } else { // SI MESSAGE SALON
                             $this->say("MESSAGE SALON $salon");
                             // Ajout du message dans la bdd
-                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ($contenu, 0, $idFrom)";
+                            $query = "INSERT INTO Message (`contenu`, `idSalon`, `idUtilisateur`) VALUES ('$contenu', 0, $idFrom)";
                             $result = mysqli_query($link, $query);
 
                             // Récupérer la liste des utilisateurs du salon

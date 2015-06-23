@@ -151,7 +151,7 @@ if ( typeof ws !== 'undefined') {
 		ws.send(JSON.stringify(msg));
 		console.log(JSON.stringify(msg));
 		//log(msg.from + " -> "+corres +" >: "+ texte.value);
-                log(msg.from + "-> "+corres+" : "+texte.value);
+                log(msg.from + " -> "+corres+" : "+texte.value);
 		// Mise à zéro du champ et focus
 		texte.focus();
 		texte.value = '';
