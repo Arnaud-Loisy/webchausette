@@ -57,6 +57,16 @@ if ( typeof ws !== 'undefined') {
 			
 			
 			break;
+			case "disconect":
+			for (i = 0; i < 9; i++) { 
+    var remove=document.getElementById(i);
+    if (remove.value==msg.login){
+    	remove.parentNode.removeChild(remove);
+    }
+}
+			
+	
+			break;
 		default:
 
 		}
@@ -176,6 +186,7 @@ function quit(){
 		};
 		ws.send(JSON.stringify(quit_msg));
 		console.log(JSON.stringify(quit_msg));
+		window.location.href = "index.html";
 }
 
 
