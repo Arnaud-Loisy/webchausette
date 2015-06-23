@@ -41,9 +41,6 @@
 				</p>
 				<ul>
 					<li>
-						<kbd>/list</kbd> : demander la date
-					</li>
-					<li>
 						<div id="buttons">
 							<input class="boutonCenter" onclick="quit()" value="quit" type="button">
 						</div>
