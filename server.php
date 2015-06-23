@@ -115,12 +115,12 @@ class ChatBot extends WebSocket {
                         $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Erreur d'authentification");
                         $errorMsg = json_encode($errorMsgTMP);
                         $this->say("$errorMsg");
-                        $this->send($utilisateur->socket, $errorMsg);
+                        $this->send($user->socket, $errorMsg);
                         $this->disconnect($user->socket);
                     }
                 } else { // Login inconnu
                     $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Erreur d'authentification");
-                    $disconnectMsg = json_encode($errorMsgTMP);
+                    $errorMsg = json_encode($errorMsgTMP);
                     $this->say($errorMsg);
                     $this->send($utilisateur->socket, $errorMsg);
                     $this->disconnect($user->socket);
