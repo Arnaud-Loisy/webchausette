@@ -10,8 +10,8 @@
 	<body>
 		<?php
 		session_start();
-		echo '<div id="login">' . $_POST["login"] . '</div>';
-		echo '<div id="pwd">' . $_POST["mdp"] . '</div>';
+		echo '<div id="login" style="DISPLAY: none">' . $_POST["login"] . '</div>';
+		echo '<div id="pwd" style="DISPLAY: none">' . $_POST["mdp"] . '</div>';
 		?>
 		<div class="wrap">
 			<div name="users" id="users">
@@ -44,7 +44,8 @@
 						<kbd>/list</kbd> : demander la date
 					</li>
 					<li>
-						<kbd>/quit</kbd> : quitter
+						
+						<input class="boutonCenter" onclick="quit()" value="quit" type="button">
 					</li>
 				</ul>
 			</form>

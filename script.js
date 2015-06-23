@@ -165,6 +165,18 @@ if ( typeof ws !== 'undefined') {
 function log(txt) {
 	document.getElementById('log').innerHTML += txt + "<br>\n";
 }
+function join() {
+	
+}
+function quit(){
+	var login = document.getElementById('login');
+	var quit_msg = {
+			type : "disconnect",
+			login : login.innerText
+		};
+		ws.send(JSON.stringify(quit_msg));
+		console.log(JSON.stringify(quit_msg));
+}
 
 
 function sleep(milliseconds) {
