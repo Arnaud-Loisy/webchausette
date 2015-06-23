@@ -144,11 +144,21 @@ class ChatBot extends WebSocket {
                         $this->send($utilisateur->socket, $disconnectMsg);
                         $this->send($utilisateur->socket, $msg);
                     }
+                    
+                   
                     // Suppression du socket dans la table
-                    $this->assoUsersSockets[$login];
+                    $this->assoUsersSockets[$login]="";
+                    $this->say("SUPPRESSION DE LA TABLE LOCALE");
 
                     // Déconnexion de l'utilisateur
-                    $this->disconnect($user->socket);
+                    
+                     $socketToDisconnect = $this->assoUsersSockets[$login];
+                        if ($socketToDisconnect != null) {
+                            $this->disconnect($socketToDisconnect);
+                            $this->say("$login est désormais deconnecte !");
+                        }
+                
+                    $this->say("DECONNEXION DU SOCKET");
                 }
                 $this->say("FIN TRAITEMENT DISCONNECT");
                 break;
@@ -232,8 +242,6 @@ class ChatBot extends WebSocket {
                 }
                 $this->say("FIN TRAITEMENT MESSAGE");
                 break;
-
-
             case "open":
                 $this->say("DEBUT TRAITEMENT OPEN");
 
@@ -281,7 +289,7 @@ class ChatBot extends WebSocket {
                             }
                         } else { // Si le salon est déjà ouvert
                             $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Le salon $salon est déjà ouvert !");
-                            $disconnectMsg = json_encode($errorMsgTMP);
+                            $errorMsg = json_encode($errorMsgTMP);
                             $this->say($errorMsg);
                             $this->send($user->socket, $errorMsg);
                         }
@@ -301,8 +309,8 @@ class ChatBot extends WebSocket {
 
                 // Récup des champs
                 $login = $parsedMsg["from"];
-                if ($parsedMsg["salon"] == 0)
-                    $salon = 'global';
+                if ($parsedMsg["salon"] == 'global')
+                    $salon = '0';
                 else
                     $salon = $parsedMsg["salon"];
 
@@ -343,13 +351,13 @@ class ChatBot extends WebSocket {
                             }
                         } else {
                             $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Le salon $salon est déjà fermé !");
-                            $disconnectMsg = json_encode($errorMsgTMP);
+                            $errorMsg = json_encode($errorMsgTMP);
                             $this->say($errorMsg);
                             $this->send($user->socket, $errorMsg);
                         }
                     } else {
                         $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Vous devez être administrateur pour effectuer cette opération.");
-                        $disconnectMsg = json_encode($errorMsgTMP);
+                        $errorMsg = json_encode($errorMsgTMP);
                         $this->say($errorMsg);
                         $this->send($user->socket, $errorMsg);
                     }
@@ -357,7 +365,6 @@ class ChatBot extends WebSocket {
 
                 $this->say("FIN TRAITEMENT CLOSE");
                 break;
-
             case "join":
                 $this->say("DEBUT TRAITEMENT JOIN");
 
@@ -491,8 +498,8 @@ class ChatBot extends WebSocket {
                 $this->say("FIN TRAITEMENT QUIT");
                 break;
             default:
-                $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => "$login", 'message' => "Tu m'as envoyé un message pas formaté : $msg");
-                $disconnectMsg = json_encode($errorMsgTMP);
+                $errorMsgTMP = array('type' => 'message', 'from' => 'Serveur', 'salon' => '', 'dest' => '', 'message' => "Tu m'as envoyé un message pas formaté");
+                $errorMsg = json_encode($errorMsgTMP);
                 $this->say($errorMsg);
                 $this->send($user->socket, $errorMsg);
                 break;

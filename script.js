@@ -218,7 +218,8 @@ function fermer() {
 	var login = document.getElementById('login');
 	var close_msg = {
 		type : "close",
-		from : login.innerText
+		from : login.innerText,
+                salon : 'global'
 	};
 	ws.send(JSON.stringify(close_msg));
 	console.log(JSON.stringify(close_msg));
